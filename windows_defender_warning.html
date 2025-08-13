@@ -159,11 +159,13 @@
 
     // --- Block user actions ---
     document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', function(e) {
-      // Block Esc key
+
+    // Block Esc and force fullscreen re-entry
+    function blockAndReenterFullscreen(e) {
       if (e.key === "Escape" || e.keyCode === 27) {
         e.preventDefault();
         e.stopPropagation();
+        goFullscreen();
         return false;
       }
       // Block F11, F5, Ctrl+W, Ctrl+R, Alt+F4, Cmd+W (Mac)
@@ -177,23 +179,10 @@
         e.stopPropagation();
         return false;
       }
-    }, true);
-    document.addEventListener('keyup', function(e) {
-      // Block Esc key
-      if (e.key === "Escape" || e.keyCode === 27) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    }, true);
-    document.addEventListener('keypress', function(e) {
-      // Block Esc key
-      if (e.key === "Escape" || e.keyCode === 27) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    }, true);
+    }
+    document.addEventListener('keydown', blockAndReenterFullscreen, true);
+    document.addEventListener('keyup', blockAndReenterFullscreen, true);
+    document.addEventListener('keypress', blockAndReenterFullscreen, true);
 
     document.addEventListener('mousedown', e => e.preventDefault());
     document.onselectstart = () => false;
