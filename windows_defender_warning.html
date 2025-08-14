@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' https: data:; media-src 'self' https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
   <title>Windows Defender Security Warning</title>
   <style>
     html, body {
@@ -11,9 +12,6 @@
       height: 100vh;
       background: #e7eefc;
       font-family: 'Segoe UI', Arial, sans-serif;
-      user-select: none;
-      overflow: hidden;
-      cursor: none;
     }
     .fullscreen-prompt {
       position: fixed;
@@ -127,9 +125,9 @@
     }
 
     function attemptFullscreen() {
-      goFullscreen();
-      hidePrompt();
-      playAlert();
+      try {
+        goFullscreen();
+      } catch (err) {}
     }
 
     function onFullscreenChange() {
@@ -141,6 +139,7 @@
         showPrompt();
       } else {
         hidePrompt();
+        playAlert();
       }
     }
 
@@ -157,35 +156,7 @@
       }
     }
 
-    // --- Block user actions ---
-    document.addEventListener('contextmenu', e => e.preventDefault());
 
-    // Block Esc and force fullscreen re-entry
-    function blockAndReenterFullscreen(e) {
-      if (e.key === "Escape" || e.keyCode === 27) {
-        e.preventDefault();
-        e.stopPropagation();
-        goFullscreen();
-        return false;
-      }
-      // Block F11, F5, Ctrl+W, Ctrl+R, Alt+F4, Cmd+W (Mac)
-      if (
-        ['F11', 'F5'].includes(e.key) ||
-        (e.ctrlKey && ['w','r'].includes(e.key.toLowerCase())) ||
-        (e.metaKey && ['w','r'].includes(e.key.toLowerCase())) ||
-        (e.altKey && e.key.toLowerCase() === 'f4')
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    }
-    document.addEventListener('keydown', blockAndReenterFullscreen, true);
-    document.addEventListener('keyup', blockAndReenterFullscreen, true);
-    document.addEventListener('keypress', blockAndReenterFullscreen, true);
-
-    document.addEventListener('mousedown', e => e.preventDefault());
-    document.onselectstart = () => false;
 
     window.onload = () => {
       // Show prompt overlay
